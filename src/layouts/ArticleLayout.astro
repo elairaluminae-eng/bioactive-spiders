@@ -1,0 +1,143 @@
+---
+interface Props {
+  content?: {
+    title: string;
+    description: string;
+    pubDate: string;
+    updatedDate?: string;
+    category: string;
+    tags: string[];
+    schemaType?: string;
+  };
+  frontmatter?: Props['content'];
+}
+
+const { frontmatter, content } = Astro.props;
+const data = frontmatter || content;
+
+if (!data) {
+  throw new Error("No frontmatter provided to ArticleLayout");
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const publishDate = new Date(data.pubDate).toISOString();
+
+const schemaJson = {
+  "@context": "https://schema.org",
+  "@type": data.schemaType || "Article",
+  "headline": data.title,
+  "description": data.description,
+  "datePublished": publishDate,
+  "dateModified": data.updatedDate ? new Date(data.updatedDate).toISOString() : publishDate,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": canonicalURL.href
+  }
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{data.title} | Bioactive Spider Care</title>
+    <meta name="description" content={data.description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={data.title} />
+    <meta property="og:description" content={data.description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:type" content="article" />
+
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(schemaJson)} />
+
+    <style>
+      :root {
+        --text: #1f2937;
+        --bg: #ffffff;
+        --accent: #15803d;
+        --border: #e5e7eb;
+      }
+      body {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.7;
+        color: var(--text);
+        background: var(--bg);
+      }
+      header {
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1.5rem;
+      }
+      .badge {
+        display: inline-block;
+        background: #dcfce7;
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        letter-spacing: 0.05em;
+      }
+      .date {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-left: 0.75rem;
+      }
+      h1 {
+        font-size: 2.25rem;
+        line-height: 1.25;
+        margin: 1rem 0 0.5rem;
+        font-weight: 800;
+      }
+      article img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+      }
+      article table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+      }
+      article th, article td {
+        border: 1px solid var(--border);
+        padding: 0.75rem;
+        text-align: left;
+      }
+      article th {
+        background: #f9fafb;
+      }
+      article blockquote {
+        border-left: 4px solid var(--accent);
+        padding: 0.75rem 1rem;
+        margin: 1.5rem 0;
+        background: #f0fdf4;
+        border-radius: 0 4px 4px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <span class="badge">{data.category}</span>
+        <time class="date">{new Date(data.pubDate).toLocaleDateString('en-US', { dateStyle: 'medium' })}</time>
+      </div>
+      <h1>{data.title}</h1>
+    </header>
+
+    <main>
+      <article>
+        <slot />
+      </article>
+    </main>
+  </body>
+</html>
