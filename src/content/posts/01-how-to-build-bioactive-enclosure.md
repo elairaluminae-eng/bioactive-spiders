@@ -5,7 +5,6 @@ pubDate: "2026-10-04"
 updatedDate: "2026-10-04"
 category: "enclosure-setup"
 tags: ["jumping spider", "bioactive vivarium", "phidippus regius", "terrarium setup", "springtails"]
-layout: "../../layouts/ArticleLayout.astro"
 schemaType: "HowTo"
 ---
 
